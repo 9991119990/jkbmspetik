@@ -149,6 +149,17 @@ def read_bms(port: str, baud: int, address: int, static_cache=None) -> dict:
 
 
 def resolve_port(configured_port: str) -> str:
+    strict_prefixes = (
+        "/dev/serial/by-path/",
+        "/dev/serial/by-id/",
+        "/dev/ttyUSB",
+        "/dev/ttyACM",
+    )
+    if configured_port.startswith(strict_prefixes):
+        if os.path.exists(configured_port):
+            return configured_port
+        raise FileNotFoundError(f"Configured serial port is not available: {configured_port}")
+
     candidates = [configured_port, "/dev/ttyACM0"]
     candidates.extend(sorted(glob.glob("/dev/serial/by-id/*")))
     candidates.extend(sorted(glob.glob("/dev/ttyACM*")))

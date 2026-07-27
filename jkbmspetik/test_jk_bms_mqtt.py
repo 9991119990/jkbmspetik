@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 from types import SimpleNamespace
 
 
@@ -97,7 +98,7 @@ class JkBmsMqttTests(unittest.TestCase):
 
     def test_run_iteration_publishes_offline_when_bms_read_fails(self):
         args = SimpleNamespace(
-            port="/dev/ttyACM0",
+            port="/dev/null",
             baud=115200,
             address=0,
             mqtt_host="core-mosquitto",
@@ -122,7 +123,7 @@ class JkBmsMqttTests(unittest.TestCase):
 
     def test_run_iteration_publishes_state_and_online_when_bms_read_succeeds(self):
         args = SimpleNamespace(
-            port="/dev/ttyACM0",
+            port="/dev/null",
             baud=115200,
             address=0,
             mqtt_host="core-mosquitto",
@@ -157,7 +158,7 @@ class JkBmsMqttTests(unittest.TestCase):
         bms = jk_bms_mqtt.BmsConfig(
             name="JK 24V 300Ah",
             topic_prefix="jk_24v300ah",
-            port="/dev/ttyUSB0",
+            port="/dev/null",
             baud=115200,
             address=0,
         )
@@ -195,21 +196,21 @@ class JkBmsMqttTests(unittest.TestCase):
             jk_bms_mqtt.BmsConfig(
                 name="JK 24V 180Ah",
                 topic_prefix="jk_24v180ah",
-                port="/dev/ttyUSB0",
+                port="/dev/null",
                 baud=115200,
                 address=0,
             ),
             jk_bms_mqtt.BmsConfig(
                 name="JK 24V 300Ah",
                 topic_prefix="jk_24v300ah",
-                port="/dev/ttyUSB1",
+                port="/dev/zero",
                 baud=115200,
                 address=0,
             ),
         ]
 
         def mixed_read_bms(port, baud, address, static_cache=None):
-            if port == "/dev/ttyUSB0":
+            if port == "/dev/null":
                 raise RuntimeError("No JK payload received")
             return {
                 "model": "JK",
@@ -290,6 +291,12 @@ class JkBmsMqttTests(unittest.TestCase):
             )
 
         self.assertNotIn("the following arguments are required: --mqtt-host", result.stderr)
+
+    def test_explicit_serial_path_does_not_fallback_to_another_adapter(self):
+        with patch.object(jk_bms_mqtt.os.path, "exists", side_effect=lambda path: path == "/dev/serial/by-id/shared-adapter"):
+            with patch.object(jk_bms_mqtt.glob, "glob", side_effect=lambda pattern: ["/dev/serial/by-id/shared-adapter"]):
+                with self.assertRaises(FileNotFoundError):
+                    jk_bms_mqtt.resolve_port("/dev/serial/by-path/missing-port")
 
 
 if __name__ == "__main__":

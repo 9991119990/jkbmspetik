@@ -58,3 +58,5 @@ sensor.jk_24v300ah_voltage
 ## USB Paths
 
 Petik has two identical `1a86:7523` USB serial adapters. Do not use `/dev/serial/by-id/` for them because only one shared by-id entry appears. Use `/dev/serial/by-path/` so each add-on port follows the physical USB port.
+
+From add-on version `0.1.3`, configured `/dev/serial/...` paths are strict. If a configured adapter disappears, that BMS is marked offline instead of falling back to another serial adapter. This avoids publishing one BMS under the other BMS name.
