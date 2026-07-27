@@ -1,0 +1,51 @@
+name: "JKBMS Petik RS485 MQTT"
+version: "0.1.0"
+slug: "jkbmspetik"
+description: "Reads two JK BMS units over RS485 and publishes separated Home Assistant MQTT discovery entities."
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+  - i386
+startup: services
+boot: auto
+init: false
+stage: stable
+url: "https://github.com/9991119990/jkbmspetik"
+apparmor: false
+full_access: true
+udev: true
+uart: true
+usb: true
+devices:
+  - /dev
+options:
+  bms:
+    - name: "JK 24V 180Ah"
+      topic_prefix: "jk_24v180ah"
+      serial_port: "/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.4:1.0-port0"
+      baud: 115200
+      address: 0
+    - name: "JK 24V 300Ah"
+      topic_prefix: "jk_24v300ah"
+      serial_port: "/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1:1.0-port0"
+      baud: 115200
+      address: 0
+  mqtt_host: "core-mosquitto"
+  mqtt_port: 1883
+  mqtt_user: ""
+  mqtt_password: ""
+  interval: 10
+schema:
+  bms:
+    - name: str
+      topic_prefix: str
+      serial_port: str
+      baud: int(110,256000)
+      address: int(0,255)
+  mqtt_host: str
+  mqtt_port: port
+  mqtt_user: str?
+  mqtt_password: password?
+  interval: int(5,300)
