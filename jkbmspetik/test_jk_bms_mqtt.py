@@ -234,6 +234,30 @@ class JkBmsMqttTests(unittest.TestCase):
         self.assertIn(("jk_24v300ah/availability", "online", True), all_published)
         self.assertTrue(any(topic == "jk_24v300ah/state" for topic, _, _ in all_published))
 
+    def test_format_configured_bms_lines(self):
+        options = {
+            "bms": [
+                {
+                    "name": "JK 24V 180Ah",
+                    "topic_prefix": "jk_24v180ah",
+                    "serial_port": "/dev/serial/by-path/port-a",
+                },
+                {
+                    "name": "JK 24V 300Ah",
+                    "topic_prefix": "jk_24v300ah",
+                    "serial_port": "/dev/serial/by-path/port-b",
+                },
+            ]
+        }
+
+        self.assertEqual(
+            jk_bms_mqtt.format_configured_bms_lines(options),
+            [
+                "- JK 24V 180Ah: /dev/serial/by-path/port-a -> jk_24v180ah",
+                "- JK 24V 300Ah: /dev/serial/by-path/port-b -> jk_24v300ah",
+            ],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -442,6 +442,13 @@ def parse_bms_configs(options: dict) -> list[BmsConfig]:
     ]
 
 
+def format_configured_bms_lines(options: dict) -> list[str]:
+    return [
+        f"- {item['name']}: {item['serial_port']} -> {item['topic_prefix']}"
+        for item in options.get("bms", [])
+    ]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", default="/dev/ttyACM0")
