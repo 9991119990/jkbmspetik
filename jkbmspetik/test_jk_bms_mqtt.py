@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 import importlib.util
+import json
 import pathlib
+import subprocess
 import sys
+import tempfile
 import unittest
 from types import SimpleNamespace
 
@@ -257,6 +260,36 @@ class JkBmsMqttTests(unittest.TestCase):
                 "- JK 24V 300Ah: /dev/serial/by-path/port-b -> jk_24v300ah",
             ],
         )
+
+    def test_options_mode_does_not_require_legacy_mqtt_host_argument(self):
+        options = {
+            "bms": [
+                {
+                    "name": "JK 24V 300Ah",
+                    "topic_prefix": "jk_24v300ah",
+                    "serial_port": "/dev/ttyUSB0",
+                    "baud": 115200,
+                    "address": 0,
+                }
+            ],
+            "mqtt_host": "core-mosquitto",
+            "mqtt_port": 1883,
+            "mqtt_user": "",
+            "mqtt_password": "",
+            "interval": 10,
+        }
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8") as options_file:
+            json.dump(options, options_file)
+            options_file.flush()
+            result = subprocess.run(
+                [sys.executable, str(MODULE_DIR / "jk_bms_mqtt.py"), "--options", options_file.name, "--once"],
+                cwd=MODULE_DIR,
+                text=True,
+                capture_output=True,
+                timeout=5,
+            )
+
+        self.assertNotIn("the following arguments are required: --mqtt-host", result.stderr)
 
 
 if __name__ == "__main__":

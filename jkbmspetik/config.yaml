@@ -1,5 +1,5 @@
 name: "JKBMS Petik RS485 MQTT"
-version: "0.1.1"
+version: "0.1.2"
 slug: "jkbmspetik"
 description: "Reads two JK BMS units over RS485 and publishes separated Home Assistant MQTT discovery entities."
 arch:

@@ -454,7 +454,7 @@ def main() -> None:
     parser.add_argument("--port", default="/dev/ttyACM0")
     parser.add_argument("--baud", type=int, default=115200)
     parser.add_argument("--address", type=lambda value: int(value, 0), default=0)
-    parser.add_argument("--mqtt-host", required=True)
+    parser.add_argument("--mqtt-host")
     parser.add_argument("--mqtt-port", type=int, default=1883)
     parser.add_argument("--mqtt-user")
     parser.add_argument("--mqtt-password")
@@ -489,6 +489,9 @@ def main() -> None:
                 break
             time.sleep(interval)
         return
+
+    if not args.mqtt_host:
+        parser.error("the following arguments are required in legacy mode: --mqtt-host")
 
     static_cache = BmsStaticCache(refresh_every=max(12, round(600 / max(args.interval, 1))))
 
