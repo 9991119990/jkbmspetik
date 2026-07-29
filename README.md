@@ -19,21 +19,21 @@ bms:
   - name: "JK 24V 180Ah"
     topic_prefix: "jk_24v180ah"
     serial_port: >-
-      /dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.4:1.0-port0
+      /dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1:1.0-port0
     baud: 115200
     address: 0
 
   - name: "JK 24V 300Ah"
     topic_prefix: "jk_24v300ah"
     serial_port: >-
-      /dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1:1.0-port0
+      /dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.4:1.0-port0
     baud: 115200
     address: 1
 
 mqtt_host: core-mosquitto
 mqtt_port: 1883
-mqtt_user: jkbridge
-mqtt_password: "doplnit_mqtt_heslo"
+mqtt_user: ""
+mqtt_password: ""
 interval: 10
 ```
 
