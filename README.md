@@ -28,7 +28,7 @@ bms:
     serial_port: >-
       /dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1:1.0-port0
     baud: 115200
-    address: 0
+    address: 1
 
 mqtt_host: core-mosquitto
 mqtt_port: 1883
@@ -54,6 +54,18 @@ MQTT discovery creates separate Home Assistant entities such as:
 sensor.jk_24v180ah_voltage
 sensor.jk_24v300ah_voltage
 ```
+
+Since add-on version `0.1.4`, each BMS also publishes calculated cell summary sensors in volts:
+
+```text
+sensor.jk_24v180ah_cell_voltage_min
+sensor.jk_24v180ah_cell_voltage_max
+sensor.jk_24v180ah_cell_voltage_average
+sensor.jk_24v180ah_cell_voltage_median
+sensor.jk_24v180ah_cell_voltage_delta
+```
+
+The same sensors are created for `jk_24v300ah`.
 
 ## USB Paths
 

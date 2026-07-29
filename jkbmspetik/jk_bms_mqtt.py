@@ -5,6 +5,7 @@ import glob
 import json
 import os
 import socket
+import statistics
 import time
 
 from read_jk_bms import COMMANDS, configure_port, decode, read_payload
@@ -20,6 +21,11 @@ SENSORS = [
     ("nominal_capacity_ah", "Nominal capacity", "Ah", None),
     ("cycles", "Cycles", None, None),
     ("delta_cell_mv", "Cell delta", "mV", "voltage"),
+    ("cell_voltage_min_v", "Cell voltage min", "V", "voltage"),
+    ("cell_voltage_max_v", "Cell voltage max", "V", "voltage"),
+    ("cell_voltage_average_v", "Cell voltage average", "V", "voltage"),
+    ("cell_voltage_median_v", "Cell voltage median", "V", "voltage"),
+    ("cell_voltage_delta_v", "Cell voltage delta", "V", "voltage"),
     ("mos_temp_c", "MOS temperature", "°C", "temperature"),
     ("temp1_c", "Temperature 1", "°C", "temperature"),
     ("temp2_c", "Temperature 2", "°C", "temperature"),
@@ -280,8 +286,15 @@ def publish_discovery(
 
 def flatten_cells(data: dict) -> dict:
     out = dict(data)
-    for idx, voltage in enumerate(data.get("cell_voltages_v", []), 1):
+    cells = data.get("cell_voltages_v", [])
+    for idx, voltage in enumerate(cells, 1):
         out[f"cell_{idx:02d}_v"] = voltage
+    if cells:
+        out["cell_voltage_min_v"] = round(min(cells), 3)
+        out["cell_voltage_max_v"] = round(max(cells), 3)
+        out["cell_voltage_average_v"] = round(sum(cells) / len(cells), 3)
+        out["cell_voltage_median_v"] = round(statistics.median(cells), 3)
+        out["cell_voltage_delta_v"] = round(max(cells) - min(cells), 3)
     return out
 
 

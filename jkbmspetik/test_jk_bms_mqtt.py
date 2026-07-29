@@ -154,6 +154,20 @@ class JkBmsMqttTests(unittest.TestCase):
         self.assertIn(("jk_bms/availability", "online", True), published)
         self.assertTrue(any(topic == "jk_bms/state" and payload["cell_01_v"] == 3.31 for topic, payload, _ in published))
 
+    def test_flatten_cells_adds_cell_voltage_summary_metrics(self):
+        data = jk_bms_mqtt.flatten_cells(
+            {
+                "cell_count": 4,
+                "cell_voltages_v": [3.321, 3.328, 3.322, 3.329],
+            }
+        )
+
+        self.assertEqual(data["cell_voltage_min_v"], 3.321)
+        self.assertEqual(data["cell_voltage_max_v"], 3.329)
+        self.assertEqual(data["cell_voltage_average_v"], 3.325)
+        self.assertEqual(data["cell_voltage_median_v"], 3.325)
+        self.assertEqual(data["cell_voltage_delta_v"], 0.008)
+
     def test_bms_iteration_uses_configured_topic_prefix(self):
         bms = jk_bms_mqtt.BmsConfig(
             name="JK 24V 300Ah",
@@ -188,7 +202,16 @@ class JkBmsMqttTests(unittest.TestCase):
         published = FakeMqttClient.instances[0].published
         self.assertIn(("jk_24v300ah/availability", "online", True), published)
         self.assertTrue(any(topic == "jk_24v300ah/state" and payload["cell_01_v"] == 3.35 for topic, payload, _ in published))
+        self.assertTrue(
+            any(
+                topic == "jk_24v300ah/state" and payload["cell_voltage_average_v"] == 3.35
+                for topic, payload, _ in published
+            )
+        )
         self.assertTrue(any(topic == "homeassistant/sensor/jk_24v300ah/voltage_v/config" for topic, _, _ in published))
+        self.assertTrue(
+            any(topic == "homeassistant/sensor/jk_24v300ah/cell_voltage_average_v/config" for topic, _, _ in published)
+        )
         self.assertFalse(any(topic.startswith("homeassistant/sensor/jk_bms/") for topic, _, _ in published))
 
     def test_polling_multiple_bms_keeps_failures_isolated(self):
